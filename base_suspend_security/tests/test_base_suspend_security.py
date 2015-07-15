@@ -28,7 +28,7 @@ class TestBaseSuspendSecurity(TransactionCase):
         user_id = self.env.ref('base.user_demo').id
         other_company = self.env['res.company'].create({
             'name': 'other company',
-            # without this, a partner is created and mail's contraint on
+            # without this, a partner is created and mail's constraint on
             # notify_email kicks in
             'partner_id': self.env.ref('base.partner_demo').id,
         })
