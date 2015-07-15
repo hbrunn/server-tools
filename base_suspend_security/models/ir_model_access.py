@@ -18,16 +18,16 @@
 #
 ##############################################################################
 from openerp import models, tools
-from .ir_rule import SUSPEND_CONTEXT_KEY
+from ..base_suspend_security import BaseSuspendSecurityUid
 
 
 class IrModelAccess(models.Model):
     _inherit = 'ir.model.access'
 
-    @tools.ormcache_context(accepted_keys=('lang', SUSPEND_CONTEXT_KEY))
+    @tools.ormcache_context(accepted_keys=('lang'))
     def check(self, cr, uid, model, mode='read', raise_exception=True,
               context=None):
-        if context and context.get(SUSPEND_CONTEXT_KEY):
+        if isinstance(uid, BaseSuspendSecurityUid):
             return True
         return super(IrModelAccess, self).check(
             cr, uid, model, mode=mode, raise_exception=raise_exception,
