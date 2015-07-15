@@ -17,8 +17,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, api
-from ..base_suspend_security import BaseSuspendSecurityUid, SUSPEND_METHOD
+from openerp import models, fields, api
+
+
+SUSPEND_CONTEXT_KEY = 'base_suspend_security'
+SUSPEND_METHOD = 'suspend_security'
 
 
 class IrRule(models.Model):
@@ -26,13 +29,13 @@ class IrRule(models.Model):
 
     @api.model
     def domain_get(self, model_name, mode='read'):
-        if isinstance(self.env.uid, BaseSuspendSecurityUid):
+        if self.env.context.get(SUSPEND_CONTEXT_KEY):
             return [], [], ['"%s"' % self.pool[model_name]._table]
         return super(IrRule, self).domain_get(model_name, mode=mode)
 
     def _register_hook(self, cr):
         if not hasattr(models.BaseModel, SUSPEND_METHOD):
             setattr(models.BaseModel, SUSPEND_METHOD,
-                    lambda self: self.sudo(
-                        user=BaseSuspendSecurityUid(self.env.uid)))
+                    lambda self: self.with_context(
+                        **dict([(SUSPEND_CONTEXT_KEY, True)])))
         return super(IrRule, self)._register_hook(cr)
