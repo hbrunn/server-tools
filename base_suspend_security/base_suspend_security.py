@@ -26,7 +26,10 @@ class BaseSuspendSecurityUid(int):
     def __eq__(self, other):
         if isinstance(other, (int, long)):
             return False
-        return super(BaseSuspendSecurityUid, self).__eq__(other)
+        return super(BaseSuspendSecurityUid, self).__int__() == other
+
+    def __iter__(self):
+        yield super(BaseSuspendSecurityUid, self).__int__()
 
 
 SUSPEND_METHOD = 'suspend_security'
