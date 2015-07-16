@@ -46,3 +46,6 @@ class TestBaseSuspendSecurity(TransactionCase):
         other_company.sudo(user_id).suspend_security().write({'name': 'test'})
         self.assertEqual(other_company.name, 'test')
         self.assertEqual(other_company.write_uid.id, user_id)
+        # this tests if _normalize_args conversion works
+        self.env['res.users'].browse(
+            self.env['res.users'].suspend_security().env.uid)
