@@ -4,7 +4,7 @@
 import json
 from lxml import etree
 from openerp import _, api, fields, models, SUPERUSER_ID
-from openerp.osv import expression
+from openerp.osv import expression  # pylint: disable=W0402
 
 
 class RestrictFieldAccessMixin(models.AbstractModel):
