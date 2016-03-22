@@ -3,12 +3,15 @@
 # * auditlog
 # 
 # Translators:
+# Antonio Trueba, 2016
+# Antonio Trueba, 2016
+# Carles Antolí <carlesantoli@hotmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: server-tools (8.0)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-29 11:14+0000\n"
-"PO-Revision-Date: 2015-09-18 13:54+0000\n"
+"POT-Creation-Date: 2016-03-17 15:36+0000\n"
+"PO-Revision-Date: 2016-03-16 09:44+0000\n"
 "Last-Translator: OCA Transbot <transbot@odoo-community.org>\n"
 "Language-Team: Spanish (http://www.transifex.com/oca/OCA-server-tools-8-0/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -28,6 +31,21 @@ msgid "Audit"
 msgstr "Auditoría"
 
 #. module: auditlog
+#: model:ir.model,name:auditlog.model_auditlog_autovacuum
+msgid "Auditlog - Delete old logs"
+msgstr ""
+
+#. module: auditlog
+#: model:ir.model,name:auditlog.model_auditlog_http_session
+msgid "Auditlog - HTTP User session log"
+msgstr ""
+
+#. module: auditlog
+#: model:ir.model,name:auditlog.model_auditlog_http_request
+msgid "Auditlog - HTTP request log"
+msgstr ""
+
+#. module: auditlog
 #: model:ir.model,name:auditlog.model_auditlog_log
 msgid "Auditlog - Log"
 msgstr "Auditlog - Registro"
@@ -43,27 +61,43 @@ msgid "Auditlog - Rule"
 msgstr "Auditlog - Regla"
 
 #. module: auditlog
-#: field:auditlog.log,create_uid:0 field:auditlog.log.line,create_uid:0
-#: field:auditlog.rule,create_uid:0
+#: field:auditlog.http.request,user_context:0
+msgid "Context"
+msgstr "Contexto"
+
+#. module: auditlog
+#: field:auditlog.autovacuum,create_uid:0
+#: field:auditlog.http.request,create_uid:0
+#: field:auditlog.http.session,create_uid:0 field:auditlog.log,create_uid:0
+#: field:auditlog.log.line,create_uid:0 field:auditlog.rule,create_uid:0
 msgid "Created by"
 msgstr "Creado por"
 
 #. module: auditlog
-#: field:auditlog.log,create_date:0 field:auditlog.log.line,create_date:0
-#: field:auditlog.rule,create_date:0
+#: field:auditlog.autovacuum,create_date:0
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: field:auditlog.http.request,create_date:0
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_search
+#: field:auditlog.http.session,create_date:0 field:auditlog.log,create_date:0
+#: field:auditlog.log.line,create_date:0 field:auditlog.rule,create_date:0
 msgid "Created on"
 msgstr "Creado en"
 
 #. module: auditlog
 #: view:auditlog.log:auditlog.view_auditlog_log_search
 msgid "Date"
-msgstr ""
+msgstr "Fecha"
 
 #. module: auditlog
 #: view:auditlog.rule:auditlog.view_auditlog_rule_search
 #: selection:auditlog.rule,state:0
 msgid "Draft"
 msgstr "No suscrito"
+
+#. module: auditlog
+#: selection:auditlog.log,log_type:0 selection:auditlog.rule,log_type:0
+msgid "Fast log"
+msgstr ""
 
 #. module: auditlog
 #: field:auditlog.log.line,field_id:0
@@ -77,26 +111,67 @@ msgid "Fields updated"
 msgstr "Campos actualizados"
 
 #. module: auditlog
+#: selection:auditlog.log,log_type:0 selection:auditlog.rule,log_type:0
+msgid "Full log"
+msgstr ""
+
+#. module: auditlog
+#: help:auditlog.rule,log_type:0
+msgid ""
+"Full log: make a diff between the data before and after the operation (log more info like computed fields which were updated, but it is slower)\n"
+"Fast log: only log the changes made through the create and write operations (less information, but it is faster)"
+msgstr ""
+
+#. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_search
 #: view:auditlog.log:auditlog.view_auditlog_log_search
 #: view:auditlog.rule:auditlog.view_auditlog_rule_search
 msgid "Group By..."
 msgstr "Agrupar por..."
 
 #. module: auditlog
-#: field:auditlog.log,id:0 field:auditlog.log.line,id:0
-#: field:auditlog.rule,id:0
+#: view:auditlog.log:auditlog.view_auditlog_log_form
+msgid "HTTP Context"
+msgstr "Contexto HTTP"
+
+#. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_form
+#: view:auditlog.log:auditlog.view_auditlog_log_search
+#: field:auditlog.log,http_request_id:0
+msgid "HTTP Request"
+msgstr "Petición HTTP"
+
+#. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_tree
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_form
+#: field:auditlog.http.session,http_request_ids:0
+#: model:ir.actions.act_window,name:auditlog.action_auditlog_http_request_tree
+#: model:ir.ui.menu,name:auditlog.menu_action_auditlog_http_request_tree
+msgid "HTTP Requests"
+msgstr "Peticiones HTTP"
+
+#. module: auditlog
+#: field:auditlog.autovacuum,id:0 field:auditlog.http.request,id:0
+#: field:auditlog.http.session,id:0 field:auditlog.log,id:0
+#: field:auditlog.log.line,id:0 field:auditlog.rule,id:0
 msgid "ID"
 msgstr "ID"
 
 #. module: auditlog
-#: field:auditlog.log,write_uid:0 field:auditlog.log.line,write_uid:0
-#: field:auditlog.rule,write_uid:0
+#: field:auditlog.autovacuum,write_uid:0
+#: field:auditlog.http.request,write_uid:0
+#: field:auditlog.http.session,write_uid:0 field:auditlog.log,write_uid:0
+#: field:auditlog.log.line,write_uid:0 field:auditlog.rule,write_uid:0
 msgid "Last Updated by"
 msgstr "Última actualización por"
 
 #. module: auditlog
-#: field:auditlog.log,write_date:0 field:auditlog.log.line,write_date:0
-#: field:auditlog.rule,write_date:0
+#: field:auditlog.autovacuum,write_date:0
+#: field:auditlog.http.request,write_date:0
+#: field:auditlog.http.session,write_date:0 field:auditlog.log,write_date:0
+#: field:auditlog.log.line,write_date:0 field:auditlog.rule,write_date:0
 msgid "Last Updated on"
 msgstr "Última actualización el"
 
@@ -132,6 +207,8 @@ msgid "Log Writes"
 msgstr "Registrar modificaciones"
 
 #. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_form
+#: field:auditlog.http.request,log_ids:0
 #: view:auditlog.log:auditlog.view_auditlog_log_search
 #: view:auditlog.log:auditlog.view_auditlog_log_tree
 #: model:ir.actions.act_window,name:auditlog.action_auditlog_log_tree
@@ -176,6 +253,12 @@ msgid "Old value Text"
 msgstr "Texto del valor anterior"
 
 #. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: field:auditlog.http.request,name:0
+msgid "Path"
+msgstr "Ruta"
+
+#. module: auditlog
 #: view:auditlog.log:auditlog.view_auditlog_log_search
 #: field:auditlog.log,res_id:0
 msgid "Resource ID"
@@ -185,6 +268,12 @@ msgstr "ID del recurso"
 #: field:auditlog.log,name:0
 msgid "Resource Name"
 msgstr "Nombre del recurso"
+
+#. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: field:auditlog.http.request,root_url:0
+msgid "Root URL"
+msgstr ""
 
 #. module: auditlog
 #: view:auditlog.rule:auditlog.view_auditlog_rule_form
@@ -233,6 +322,17 @@ msgid ""
 msgstr "Marque esta casilla si desea registrar la lectura/apertura de cualquier registro del modelo de esta regla"
 
 #. module: auditlog
+#: field:auditlog.http.request,http_session_id:0
+#: field:auditlog.log,http_session_id:0
+msgid "Session"
+msgstr "Sesión"
+
+#. module: auditlog
+#: field:auditlog.http.session,name:0
+msgid "Session ID"
+msgstr ""
+
+#. module: auditlog
 #: view:auditlog.rule:auditlog.view_auditlog_rule_search
 #: field:auditlog.rule,state:0
 msgid "State"
@@ -257,15 +357,39 @@ msgid ""
 msgstr "Ya existe una regla definida para este modelo.\nNo puede definir otra: por favor, modifique el existente."
 
 #. module: auditlog
+#: field:auditlog.log,log_type:0 field:auditlog.rule,log_type:0
+msgid "Type"
+msgstr ""
+
+#. module: auditlog
 #: view:auditlog.rule:auditlog.view_auditlog_rule_form
 msgid "Unsubscribe"
 msgstr "Desuscribir"
 
 #. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: field:auditlog.http.request,user_id:0
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_search
+#: field:auditlog.http.session,user_id:0
 #: view:auditlog.log:auditlog.view_auditlog_log_search
 #: field:auditlog.log,user_id:0
 msgid "User"
 msgstr "Usuario"
+
+#. module: auditlog
+#: view:auditlog.http.request:auditlog.view_auditlog_http_request_search
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_form
+#: view:auditlog.log:auditlog.view_auditlog_log_search
+msgid "User session"
+msgstr ""
+
+#. module: auditlog
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_search
+#: view:auditlog.http.session:auditlog.view_auditlog_http_session_tree
+#: model:ir.actions.act_window,name:auditlog.action_auditlog_http_session_tree
+#: model:ir.ui.menu,name:auditlog.menu_action_auditlog_http_session_tree
+msgid "User sessions"
+msgstr ""
 
 #. module: auditlog
 #: field:auditlog.rule,user_ids:0
@@ -278,12 +402,12 @@ msgid "Values"
 msgstr "Valores"
 
 #. module: auditlog
-#: code:addons/auditlog/models/rule.py:478
+#: code:addons/auditlog/models/rule.py:555
 #, python-format
 msgid "View logs"
-msgstr ""
+msgstr "Ver registros"
 
 #. module: auditlog
 #: help:auditlog.rule,user_ids:0
 msgid "if  User is not added then it will applicable for all users"
-msgstr ""
+msgstr "Si el usuario no se agrega entonces será aplicable para todos los usuarios"

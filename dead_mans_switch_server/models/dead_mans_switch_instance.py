@@ -102,7 +102,7 @@ class DeadMansSwitchInstance(models.Model):
     @api.model
     def _search_alive(self, operator, value):
         alive = True if operator == '=' and value or\
-                operator == '!=' and not value else False
+            operator == '!=' and not value else False
         self.env.cr.execute(
             'select i.id from dead_mans_switch_instance i '
             'left join (select instance_id, max(create_date) create_date '
@@ -110,7 +110,7 @@ class DeadMansSwitchInstance(models.Model):
             'on l.instance_id=i.id '
             "where coalesce(l.create_date, '1970-01-01'::timestamp) %s "
             "now() at time zone 'utc' - "
-            "(alive_max_delay || 'seconds')::interval "
+            "(2 * alive_max_delay || 'seconds')::interval "
             "group by i.id " %
             (alive and '>=' or '<'))
         return [('id', 'in', [i for i, in self.env.cr.fetchall()])]
@@ -139,18 +139,18 @@ class DeadMansSwitchInstance(models.Model):
     @api.model
     def check_alive(self):
         """handle cronjob"""
-        for this in self.search([('state', '=', 'active')]):
-            if this.alive:
-                continue
-            last_post = fields.Datetime.from_string(this.message_last_post)
-            if not last_post or datetime.utcnow() - timedelta(
-                    seconds=this.alive_max_delay * 2) > last_post:
-                this.panic()
+        for this in self.search(self._needaction_domain_get()):
+            this.panic()
 
     @api.multi
     def panic(self):
         """override for custom handling"""
         self.ensure_one()
+        last_post = fields.Datetime.from_string(self.message_last_post)
+        if last_post and last_post >= datetime.utcnow() - 3 * timedelta(
+                seconds=self.alive_max_delay):
+            # don't nag too often
+            return
         self.message_post(
             type='comment', subtype='mt_comment',
             subject=_('Dead man\'s switch warning: %s') %
