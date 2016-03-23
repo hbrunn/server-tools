@@ -30,3 +30,4 @@ class TestBaseMixinRestrictFieldAccess(TransactionCase):
         partner.search([])
         self.assertTrue(partner.restrict_field_access)
         partner.fields_view_get()
+        # TODO: a lot more tests

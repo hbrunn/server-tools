@@ -74,9 +74,11 @@ class RestrictFieldAccessMixin(models.AbstractModel):
 
     @api.multi
     def write(self, vals):
-        restricted_vals = self._restrict_field_access_filter_vals(
-            vals, action='write')
-        return super(RestrictFieldAccessMixin, self).write(restricted_vals)
+        for this in self:
+            # this way, we get the minimal values we can write on all records
+            vals = this._restrict_field_access_filter_vals(
+                vals, action='write')
+        return super(RestrictFieldAccessMixin, self).write(vals)
 
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False,
@@ -108,8 +110,8 @@ class RestrictFieldAccessMixin(models.AbstractModel):
     def _restrict_field_access_inject_restrict_field_access_domain(
             self, domain):
         """inject a proposition to restrict search results to only the ones
-        the where the user may access all fields in the search domain. If you
-        If you override _restrict_field_access_is_field_accessible to make
+        where the user may access all fields in the search domain. If you
+        you override _restrict_field_access_is_field_accessible to make
         fields accessible depending on some other field values, override this
         in order not to leak information"""
         pass
@@ -203,10 +205,12 @@ class RestrictFieldAccessMixin(models.AbstractModel):
         """return True if we shouldn't check for field access restrictions"""
         return self.env.context.get('_restrict_field_access_suspend')
 
-    @api.model
+    @api.multi
     def _restrict_field_access_filter_vals(self, vals, action='read'):
         """remove inaccessible fields from vals"""
-        this = self.new(vals)
+        assert len(self) <= 1, 'This function needs an empty recordset or '\
+            'exactly one record'
+        this = self.new(dict((self.copy_data()[0] if self else {}), **vals))
         return dict(
             filter(
                 lambda itemtuple:
