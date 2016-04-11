@@ -25,6 +25,7 @@ addon | version | summary
 [auth_from_http_remote_user](auth_from_http_remote_user/) | 8.0.1.0.0 | Authenticate via HTTP Remote User
 [auth_signup_verify_email](auth_signup_verify_email/) | 8.0.1.0.0 | Force uninvited users to use a good email for signup
 [auth_supplier](auth_supplier/) | 8.0.1.0.0 | Auth Supplier
+[auto_backup](auto_backup/) | 8.0.1.0.0 | Backups database
 [base_concurrency](base_concurrency/) | 8.0.1.0.0 | Base Concurrency
 [base_custom_info](base_custom_info/) | 8.0.1.0.0 | Add custom field in models
 [base_debug4all](base_debug4all/) | 8.0.1.0.0 | Shows full debug options for all users
@@ -47,6 +48,7 @@ addon | version | summary
 [disable_openerp_online](disable_openerp_online/) | 8.0.1.1.0 | Remove odoo.com bindings
 [fetchmail_attach_from_folder](fetchmail_attach_from_folder/) | 8.0.1.0.1 | Attach mails in an IMAP folder to existing objects
 [fetchmail_notify_error_to_sender](fetchmail_notify_error_to_sender/) | 8.0.1.0.0 | If fetching mails gives error, send an email to sender
+[html_text](html_text/) | 8.0.1.0.0 | Generate excerpts from any HTML field
 [inactive_session_timeout](inactive_session_timeout/) | 8.0.1.0.0 | This module disable all inactive sessions since a given delay
 [language_path_mixin](language_path_mixin/) | 8.0.1.0.0 | Setting the partner's language in RML reports
 [log_forwarded_for_ip](log_forwarded_for_ip/) | 8.0.1.0.0 | Displays source IPs in log when behind a reverse proxy
