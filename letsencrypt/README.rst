@@ -136,6 +136,7 @@ Contributors
 ------------
 
 * Holger Brunn <hbrunn@therp.nl>
+* Antonio Espinosa <antonio.espinosa@tecnativa.com>
 
 ACME implementation
 -------------------

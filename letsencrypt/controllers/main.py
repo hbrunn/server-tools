@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # © 2016 Therp BV <http://therp.nl>
+# © 2016 Antonio Espinosa <antonio.espinosa@tecnativa.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import os
 from openerp import http

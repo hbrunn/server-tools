@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # © 2016 Therp BV <http://therp.nl>
+# © 2016 Antonio Espinosa <antonio.espinosa@tecnativa.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import os
 import logging
@@ -163,5 +164,5 @@ class Letsencrypt(models.AbstractModel):
             _logger.info('reloading webserver...')
             self.call_cmdline(['sh', '-c', reload_cmd])
         else:
-            _logger.info('no command defined for reloading webserver, please'
+            _logger.info('no command defined for reloading webserver, please '
                          'do it manually in order to apply new certificate')
