@@ -4,17 +4,15 @@
 import os
 from openerp import http
 from openerp.http import request
+from ..models.letsencrypt import get_challenge_dir
 
 
 class Letsencrypt(http.Controller):
     @http.route('/.well-known/acme-challenge/<filename>', auth='none')
     def acme_challenge(self, filename):
         try:
-            with file(
-                os.path.join(request.env['letsencrypt'].get_challenge_dir(),
-                             filename)
-            ) as challenge:
-                return challenge.read()
+            with file(os.path.join(get_challenge_dir(), filename)) as key:
+                return key.read()
         except IOError:
             pass
         return request.not_found()

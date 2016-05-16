@@ -21,5 +21,9 @@
         'bin': [
             'openssl',
         ],
+        'python': [
+            'acme_tiny',
+            'IPy',
+        ],
     },
 }
