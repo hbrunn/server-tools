@@ -11,7 +11,7 @@ class RestrictFieldAccessMixin(models.AbstractModel):
     """Mixin to restrict access to fields on record level"""
     _name = 'restrict.field.access.mixin'
 
-    # TODO: read_group, everything that was forgotten
+    # TODO: read_group, __export_rows, everything that was forgotten
 
     @api.multi
     def _compute_restrict_field_access(self):
