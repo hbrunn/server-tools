@@ -81,7 +81,7 @@ class CleanupPurgeWizardData(orm.TransientModel):
             cr.execute(
                 """
                 SELECT id FROM ir_model_data
-                WHERE model = %%s
+                WHERE model = %s
                 AND res_id IS NOT NULL
                 AND NOT EXISTS (
                     SELECT id FROM %s WHERE id=ir_model_data.res_id)

@@ -79,7 +79,7 @@ class CleanupPurgeLineTable(orm.TransientModel):
 
             self.logger.info(
                 'Dropping table %s', line.name)
-            cr.execute("DROP TABLE %s", (IdentifierAdapter(line.name,)))
+            cr.execute("DROP TABLE %s", (IdentifierAdapter(line.name),))
             line.write({'purged': True})
             cr.commit()
         return True
