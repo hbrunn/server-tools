@@ -14,6 +14,12 @@
     "data": [
         'views/templates.xml',
     ],
+    # this will be activated in the module's post_load_hook if we run on oca's
+    # runbot
+    "demo_deactivated": [
+        'demo/res_partner.xml'
+    ],
+    "post_load": "post_load_hook",
     "qweb": [
         'static/src/xml/field_rrule.xml',
     ],
