@@ -124,6 +124,8 @@ class RestrictFieldAccessMixin(models.AbstractModel):
         if isinstance(self, RestrictFieldAccessMixin):
             sanitised_fields = [f for f in fields if f and self._restrict_field_access_is_field_accessible(f[0])]
             return super(RestrictFieldAccessMixin, self)._BaseModel__export_rows(sanitised_fields)
+        else:
+            return super(RestrictFieldAccessMixin, self)._BaseModel__export_rows(fields)
 
     @api.multi
     def write(self, vals):
