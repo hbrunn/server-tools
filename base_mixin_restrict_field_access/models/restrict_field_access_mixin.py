@@ -80,8 +80,12 @@ class RestrictFieldAccessMixin(models.AbstractModel):
         If this removes all 'groupby', group by first remaining field.
         If this removes 'orderby', don't specify order.
         """
-        fields = fields or self._columns.keys()
-        sanitised_fields = [f for f in fields if self._restrict_field_access_is_field_accessible(cr, uid, [], f)]
+        requested_fields = fields or self._columns.keys()
+        sanitised_fields = [
+            f for f in requested_fields if self._restrict_field_access_is_field_accessible(
+                cr, uid, [], f
+            )
+        ]
         if 'restrict_field_access' in sanitised_fields:
             sanitised_fields.remove('restrict_field_access')
         if not sanitised_fields:
@@ -106,7 +110,7 @@ class RestrictFieldAccessMixin(models.AbstractModel):
         else:
             sanitised_orderby = False
 
-        return super(RestrictFieldAccessMixin, self).read_group(
+        result = super(RestrictFieldAccessMixin, self).read_group(
             cr,
             uid,
             domain,
@@ -118,6 +122,27 @@ class RestrictFieldAccessMixin(models.AbstractModel):
             orderby=sanitised_orderby,
             lazy=lazy
         )
+        # Add inaccessible fields back in with null values
+        inaccessible_fields = [f for f in requested_fields if f not in sanitised_fields]
+        for field_name in inaccessible_fields:
+            field = self._columns[field_name]
+            if lazy:
+                result.append(
+                    {
+                        '__domain': [(True, '=', True)],
+                        field_name: field.null(self.env),
+                        field_name + '_count': 0L
+                    }
+                )
+            else:
+                result.append(
+                    {
+                        '__domain': [(True, '=', True)],
+                        field_name: field.null(self.env),
+                        '__count': 0L
+                    }
+                )
+        return result
 
     @api.multi
     def _BaseModel__export_rows(self, fields):
