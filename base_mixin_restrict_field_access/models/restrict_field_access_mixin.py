@@ -80,6 +80,7 @@ class RestrictFieldAccessMixin(models.AbstractModel):
         If this removes all 'groupby', group by first remaining field.
         If this removes 'orderby', don't specify order.
         """
+        fields = fields or self._columns.keys()
         sanitised_fields = [f for f in fields if self._restrict_field_access_is_field_accessible(cr, uid, [], f)]
         if 'restrict_field_access' in sanitised_fields:
             sanitised_fields.remove('restrict_field_access')
