@@ -86,8 +86,6 @@ class RestrictFieldAccessMixin(models.AbstractModel):
                 cr, uid, [], f
             )
         ]
-        if 'restrict_field_access' in sanitised_fields:
-            sanitised_fields.remove('restrict_field_access')
         if not sanitised_fields:
             return []
 
