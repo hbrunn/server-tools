@@ -19,6 +19,10 @@ class TestBaseViewInheritanceExtension(TransactionCase):
             'default_name' in
             view.xpath('//field[@name="parent_id"]')[0].get('context')
         )
+        self.assertTrue(
+            "context.get('company_id', context.get('company'))" in
+            view.xpath('//field[@name="parent_id"]')[0].get('context')
+        )
         # verify we moved the child_ids field
         self.assertEqual(
             view.xpath('//field[@name="child_ids"]')[0].getparent(),
