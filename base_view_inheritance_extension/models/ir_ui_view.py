@@ -20,6 +20,7 @@ class IrUiView(models.Model):
             for child in spec:
                 for node, handler in self._iter_inheritance_specs(child):
                     yield node, handler
+            return
         if spec.get('position') == 'attributes':
             for child in spec:
                 node = etree.Element(spec.tag, **spec.attrib)
