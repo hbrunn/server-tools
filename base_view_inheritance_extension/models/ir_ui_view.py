@@ -16,12 +16,10 @@ class IrUiView(models.Model):
 
     @api.model
     def _iter_inheritance_specs(self, spec):
-        handled_by = None
         if spec.tag == 'data':
             for child in spec:
                 for node, handler in self._iter_inheritance_specs(child):
                     yield node, handler
-        node_handler = None
         if spec.get('position') == 'attributes':
             for child in spec:
                 node = etree.Element(spec.tag, **spec.attrib)
