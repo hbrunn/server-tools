@@ -5,6 +5,39 @@ from lxml import etree
 from openerp import api, models, tools
 
 
+class UnquoteObject(str):
+    def __getattr__(self, name):
+        return UnquoteObject('%s.%s' % (self, name))
+
+    def __repr__(self):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        return UnquoteObject(
+            '%s(%s)' % (
+                self,
+                ','.join(
+                    [
+                        UnquoteObject(
+                            a if not isinstance(a, basestring)
+                            else "'%s'" % a
+                        )
+                        for a in args
+                    ] +
+                    [
+                        '%s=%s' % (UnquoteObject(k), v)
+                        for (k, v) in kwargs.iteritems()
+                    ]
+                )
+            )
+        )
+
+
+class UnquoteEvalObjectContext(tools.misc.UnquoteEvalContext):
+    def __missing__(self, key):
+        return UnquoteObject(key)
+
+
 class IrUiView(models.Model):
     _inherit = 'ir.ui.view'
 
@@ -69,7 +102,7 @@ class IrUiView(models.Model):
         for attribute_node in specs:
             python_dict = tools.safe_eval(
                 node.get(attribute_node.get('name')) or '{}',
-                tools.misc.UnquoteEvalContext()
+                UnquoteEvalObjectContext()
             )
             python_dict[attribute_node.get('key')] = tools.misc.unquote(
                 attribute_node.text
