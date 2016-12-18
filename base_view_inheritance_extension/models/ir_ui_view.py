@@ -104,7 +104,7 @@ class IrUiView(models.Model):
                 node.get(attribute_node.get('name')) or '{}',
                 UnquoteEvalObjectContext()
             )
-            python_dict[attribute_node.get('key')] = tools.misc.unquote(
+            python_dict[attribute_node.get('key')] = UnquoteObject(
                 attribute_node.text
             )
             node.attrib[attribute_node.get('name')] = str(python_dict)
