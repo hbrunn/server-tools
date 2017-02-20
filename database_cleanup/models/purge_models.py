@@ -2,7 +2,7 @@
 # © 2014-2017 Therp BV <http://therp.nl>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from openerp import _, api, models, fields
-from openerp.exceptions import UserError
+from openerp.exceptions import Warning as UserError
 from openerp.addons.base.ir.ir_model import MODULE_UNINSTALL_FLAG
 
 
