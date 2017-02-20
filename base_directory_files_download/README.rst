@@ -46,11 +46,6 @@ To use this module, you need to:
    :target: https://runbot.odoo-community.org/runbot/149/10.0
 
 
-Known issues / Roadmap
-======================
-
-* ...
-
 Bug Tracker
 ===========
 
