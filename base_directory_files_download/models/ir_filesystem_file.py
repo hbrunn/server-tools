@@ -12,7 +12,7 @@ from odoo.tools import human_size
 _logger = logging.getLogger(__name__)
 
 
-class IrFilesystemDirectoryLine(models.TransientModel):
+class IrFilesystemFile(models.AbstractModel):
     _name = 'ir.filesystem.file'
 
     name = fields.Char(required=True)

@@ -33,13 +33,14 @@ class IrFilesystemDirectory(models.Model):
         return join(directory, '')
 
     @api.multi
+    @api.depends('directory')
     def _compute_file_ids(self):
         File = self.env['ir.filesystem.file']
         for directory in self:
             directory.file_ids = None
             if directory.get_dir():
                 for file_name in directory._get_directory_files():
-                    directory.file_ids += File.create({
+                    directory.file_ids += File.new({
                         'name': file_name,
                         'filename': file_name,
                         'stored_filename': file_name,
@@ -81,6 +82,25 @@ class IrFilesystemDirectory(models.Model):
                     exc_info=True
                 )
         return files
+
+    @api.multi
+    def read(self, fields=None, load='_classic_read'):
+        read_file_ids = not fields or 'file_ids' in fields
+        result = super(IrFilesystemDirectory, self).read(
+            fields=fields, load=load
+        )
+        if read_file_ids:
+            i = 0
+            # we can assume the same order
+            for this in self:
+                # trigger field computation
+                this.file_ids.mapped('file_content')
+                result[i]['file_ids'] = [
+                    (0, 0, dict(f._cache))
+                    for f in this.file_ids
+                ]
+                i += 1
+        return result
 
     @api.multi
     def reload(self):
