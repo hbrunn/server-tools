@@ -13,6 +13,14 @@
                     <button type="object" name="purge_all" string="Purge all data" />
                     <button type="object" name="select_lines" string="Select lines" />
                     <field name="purge_line_ids" colspan="4" nolabel="1">
+                        <tree string="Purge data">
+                            <field name="name" />
+                            <field name="data_id" />
+                            <field name="purged" invisible="0" />
+                            <button type="object" name="purge"
+                                    icon="gtk-cancel" string="Purge this data"
+                                    attrs="{'invisible': [('purged', '=', True)]}"/>
+                        </tree>
                         <form string="Purge data">
                             <group>
                                 <field name="name" />

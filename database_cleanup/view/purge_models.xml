@@ -13,6 +13,13 @@
                     <button type="object" name="purge_all" string="Purge all models" />
                     <button type="object" name="select_lines" string="Select lines" />
                     <field name="purge_line_ids" colspan="4" nolabel="1">
+                        <tree string="Purge models">
+                            <field name="name" />
+                            <field name="purged" invisible="0" />
+                            <button type="object" name="purge"
+                                    icon="gtk-cancel" string="Purge this model"
+                                    attrs="{'invisible': [('purged', '=', True)]}"/>
+                        </tree>
                         <form string="Purge models">
                             <group>
                                 <field name="name" />
