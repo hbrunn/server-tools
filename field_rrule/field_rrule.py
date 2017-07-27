@@ -16,7 +16,7 @@ class LocalRRuleSet(rruleset):
     """An rruleset that yields the naive utc representation of a date if the
     original date was timezone aware"""
     def __iter__(self):
-        for date in super(LocalRRuleSet, self).__iter__():
+        for date in rruleset.__iter__(self):
             if not date.tzinfo:
                 yield date
             else:
