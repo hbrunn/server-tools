@@ -103,3 +103,26 @@ class TestFieldRrule(TransactionCase):
                 datetime.datetime(2017, 3, 31, 22, 0),
             ]
         )
+        # and the same again with the json representation
+        record.rrule_with_tz = [
+            {
+                'type': 'rrule',
+                'dtstart': '2017-02-02 23:00:00',
+                'interval': 1,
+                'freq': MONTHLY,
+                'count': 2,
+                'bymonthday': [1],
+            },
+            {
+                'type': 'tz',
+                'tz': 'Europe/Amsterdam',
+            }
+        ]
+        self.assertTrue(record.rrule_with_tz.tz)
+        self.assertEqual(
+            list(record.rrule_with_tz()),
+            [
+                datetime.datetime(2017, 2, 28, 23, 0),
+                datetime.datetime(2017, 3, 31, 22, 0),
+            ]
+        )

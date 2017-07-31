@@ -5,11 +5,11 @@ import pytz
 from dateutil.rrule import rrule, rruleset
 from dateutil.tz import gettz
 from openerp import fields, models
-_DATETIME_FIELDS = ['_until', '_dtstart']
-_SCALAR_FIELDS = [
+_RRULE_DATETIME_FIELDS = ['_until', '_dtstart']
+_RRULE_SCALAR_FIELDS = [
     '_wkst', '_cache', '_until', '_dtstart', '_count', '_freq', '_interval',
 ]
-_ZERO_IS_NOT_NONE = ['_freq']
+_RRULE_ZERO_IS_NOT_NONE = ['_freq']
 
 
 class LocalRRuleSet(rruleset):
@@ -38,14 +38,17 @@ class SerializableRRuleSet(list):
             yield dict(type='rrule', **{
                 key[1:]:
                 fields.Datetime.to_string(
-                    getattr(rule, key) if not self.tz or not getattr(rule, key)
+                    getattr(rule, key) if
+                    not self.tz or not getattr(rule, key) or
+                    not getattr(rule, key).tzinfo
                     else getattr(rule, key).astimezone(pytz.utc)
                 )
-                if key in _DATETIME_FIELDS
+                if key in _RRULE_DATETIME_FIELDS
                 else
-                [] if getattr(rule, key) is None and key not in _SCALAR_FIELDS
+                [] if getattr(rule, key) is None and
+                key not in _RRULE_SCALAR_FIELDS
                 else
-                list(getattr(rule, key)) if key not in _SCALAR_FIELDS
+                list(getattr(rule, key)) if key not in _RRULE_SCALAR_FIELDS
                 else getattr(rule, key)
                 for key in [
                     '_byhour', '_wkst', '_bysecond', '_bymonthday',
@@ -119,7 +122,10 @@ class FieldRRule(fields.Serialized):
             assert isinstance(data, dict), 'The list must contain dictionaries'
             assert 'type' in data, 'The dictionary must contain a type'
             data_type = data['type']
-            data = self.convert_to_cache_parse_data(record, data)
+            if hasattr(self, 'convert_to_cache_parse_data_%s' % data_type):
+                data = getattr(
+                    self, 'convert_to_cache_parse_data_%s' % data_type
+                )(record, data)
             if data_type == 'rrule':
                 result._rrule.append(rrule(**data))
             elif data_type == 'tz' and self.stable_times:
@@ -131,15 +137,16 @@ class FieldRRule(fields.Serialized):
             self._add_tz(result, tz or record.env.user.tz or 'utc')
         return result
 
-    def convert_to_cache_parse_data(self, record, data):
+    def convert_to_cache_parse_data_rrule(self, record, data):
         """parse a data dictionary from the database"""
         return {
             key: fields.Datetime.from_string(value)
-            if '_%s' % key in _DATETIME_FIELDS
+            if '_%s' % key in _RRULE_DATETIME_FIELDS
             else map(int, value)
-            if value and '_%s' % key not in _SCALAR_FIELDS
+            if value and '_%s' % key not in _RRULE_SCALAR_FIELDS
             else int(value) if value
-            else None if not value and '_%s' % key not in _ZERO_IS_NOT_NONE
+            else None
+            if not value and '_%s' % key not in _RRULE_ZERO_IS_NOT_NONE
             else value
             for key, value in data.iteritems()
             if key != 'type'
@@ -156,7 +163,7 @@ class FieldRRule(fields.Serialized):
         value.tz = tz
         tz = gettz(tz)
         for rule in value._rrule:
-            for fieldname in _DATETIME_FIELDS:
+            for fieldname in _RRULE_DATETIME_FIELDS:
                 date = getattr(rule, fieldname)
                 if not date:
                     continue
