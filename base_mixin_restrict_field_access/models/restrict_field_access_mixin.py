@@ -5,13 +5,13 @@ import json
 from lxml import etree
 from openerp import _, api, fields, models, SUPERUSER_ID
 from openerp.osv import expression  # pylint: disable=W0402
+from openerp.addons.base_suspend_security.base_suspend_security import\
+    BaseSuspendSecurityUid
 
 
 class RestrictFieldAccessMixin(models.AbstractModel):
     """Mixin to restrict access to fields on record level"""
     _name = 'restrict.field.access.mixin'
-
-    # TODO: read_group, everything that was forgotten
 
     @api.multi
     def _compute_restrict_field_access(self):
@@ -70,13 +70,87 @@ class RestrictFieldAccessMixin(models.AbstractModel):
                 if not self._restrict_field_access_is_field_accessible(field):
                     record[field] = self._fields[field].convert_to_read(
                         self._fields[field].null(self.env))
+                    if self._fields[field] in self.env.cache:
+                        self.env.cache[self._fields[field]].pop(
+                            record['id'], False)
+        return result
+
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None,
+                   orderby=False, lazy=True):
+        """Restrict reading if we read an inaccessible field"""
+        has_inaccessible_field = False
+        has_inaccessible_field |= any(
+            not self._restrict_field_access_is_field_accessible(f)
+            for f in fields or self._fields.keys()
+        )
+        has_inaccessible_field |= any(
+            expression.is_leaf(term) and
+            not self._restrict_field_access_is_field_accessible(
+                term[0].split('.')[0]
+            )
+            for term in domain
+        )
+        if groupby:
+            if isinstance(groupby, basestring):
+                groupby = [groupby]
+            has_inaccessible_field |= any(
+                not self._restrict_field_access_is_field_accessible(
+                    f.split(':')[0]
+                )
+                for f in groupby
+            )
+        if orderby:
+            has_inaccessible_field |= any(
+                not self._restrict_field_access_is_field_accessible(f.split())
+                for f in orderby.split(',')
+            )
+        # just like with search, we restrict read_group to the accessible
+        # records, because we'd either leak data otherwise or have very wrong
+        # results
+        if has_inaccessible_field:
+            self._restrict_field_access_inject_restrict_field_access_domain(
+                domain
+            )
+
+        return super(RestrictFieldAccessMixin, self).read_group(
+            domain, fields, groupby, offset=offset, limit=limit,
+            orderby=orderby, lazy=lazy
+        )
+
+    @api.multi
+    def _BaseModel__export_rows(self, fields):
+        """Null inaccessible fields"""
+        result = []
+        for this in self:
+            rows = super(RestrictFieldAccessMixin, this)\
+                ._BaseModel__export_rows(fields)
+            for row in rows:
+                for i, path in enumerate(fields):
+                    # we only need to take care of our own fields, super calls
+                    # __export_rows again for x2x exports
+                    if not path or len(path) > 1:
+                        continue
+                    if not this._restrict_field_access_is_field_accessible(
+                            path[0],
+                    ) and row[i]:
+                        field = self._fields[path[0]]
+                        row[i] = field.convert_to_export(
+                            field.convert_to_cache(
+                                field.null(self.env), this, validate=False,
+                            ),
+                            self.env
+                        )
+            result.extend(rows)
         return result
 
     @api.multi
     def write(self, vals):
-        restricted_vals = self._restrict_field_access_filter_vals(
-            vals, action='write')
-        return super(RestrictFieldAccessMixin, self).write(restricted_vals)
+        for this in self:
+            # this way, we get the minimal values we can write on all records
+            vals = this._restrict_field_access_filter_vals(
+                vals, action='write')
+        return super(RestrictFieldAccessMixin, self).write(vals)
 
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False,
@@ -108,8 +182,8 @@ class RestrictFieldAccessMixin(models.AbstractModel):
     def _restrict_field_access_inject_restrict_field_access_domain(
             self, domain):
         """inject a proposition to restrict search results to only the ones
-        the where the user may access all fields in the search domain. If you
-        If you override _restrict_field_access_is_field_accessible to make
+        where the user may access all fields in the search domain. If you
+        you override _restrict_field_access_is_field_accessible to make
         fields accessible depending on some other field values, override this
         in order not to leak information"""
         pass
@@ -117,6 +191,7 @@ class RestrictFieldAccessMixin(models.AbstractModel):
     @api.cr_uid_context
     def fields_view_get(self, cr, uid, view_id=None, view_type='form',
                         context=None, toolbar=False, submenu=False):
+        # pylint: disable=R8110
         # This needs to be oldstyle because res.partner in base passes context
         # as positional argument
         result = super(RestrictFieldAccessMixin, self).fields_view_get(
@@ -194,19 +269,19 @@ class RestrictFieldAccessMixin(models.AbstractModel):
     @api.model
     def _restrict_field_access_suspend(self):
         """set a marker that we don't want to restrict field access"""
-        # TODO: this is insecure. in the end, we need something in the lines of
-        # base_suspend_security's uid-hack
-        return self.with_context(_restrict_field_access_suspend=True)
+        return self.suspend_security()
 
     @api.model
     def _restrict_field_access_get_is_suspended(self):
         """return True if we shouldn't check for field access restrictions"""
-        return self.env.context.get('_restrict_field_access_suspend')
+        return isinstance(self.env.uid, BaseSuspendSecurityUid)
 
-    @api.model
+    @api.multi
     def _restrict_field_access_filter_vals(self, vals, action='read'):
         """remove inaccessible fields from vals"""
-        this = self.new(vals)
+        assert len(self) <= 1, 'This function needs an empty recordset or '\
+            'exactly one record'
+        this = self.new(dict((self.copy_data()[0] if self else {}), **vals))
         return dict(
             filter(
                 lambda itemtuple:
@@ -218,9 +293,13 @@ class RestrictFieldAccessMixin(models.AbstractModel):
     def _restrict_field_access_is_field_accessible(self, field_name,
                                                    action='read'):
         """return True if the current user can perform specified action on
-        all records in self. Override for your own logic"""
+        all records in self. Override for your own logic.
+        This function is also called with an empty recordset to get a list
+        of fields which are accessible unconditionally"""
         if self._restrict_field_access_get_is_suspended() or\
-                self.env.user.id == SUPERUSER_ID:
+                self.env.user.id == SUPERUSER_ID or\
+                not self and action == 'read' and\
+                self._fields[field_name].required:
             return True
         whitelist = self._restrict_field_access_get_field_whitelist(
             action=action)
