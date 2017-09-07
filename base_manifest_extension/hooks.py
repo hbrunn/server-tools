@@ -48,7 +48,7 @@ def _get_cr():
 def _get_graph():
     graph = None
     for frame, filename, lineno, funcname, line, index in inspect.stack():
-        # walk up the stack until we've found a cursor
+        # walk up the stack until we've found a graph
         if 'graph' in frame.f_locals and isinstance(
             frame.f_locals['graph'], Graph
         ):
