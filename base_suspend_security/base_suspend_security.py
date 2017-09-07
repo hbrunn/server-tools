@@ -21,9 +21,11 @@
 
 class BaseSuspendSecurityUid(int):
     def __int__(self):
-        return self
+        return self * 1
 
     def __eq__(self, other):
+        if isinstance(other, BaseSuspendSecurityUid):
+            return int(self) == int(other)
         if isinstance(other, (int, long)):
             return False
         return super(BaseSuspendSecurityUid, self).__int__() == other
