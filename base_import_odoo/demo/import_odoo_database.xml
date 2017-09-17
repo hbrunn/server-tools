@@ -5,7 +5,7 @@
             <field name="url">http://localhost:8069</field>
             <field name="database">demodb</field>
             <field name="user">admin</field>
-            <field name="password">admin</field>
+            <field name="password" eval="False" />
         </record>
     </data>
 </openerp>

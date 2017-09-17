@@ -73,6 +73,8 @@ class ImportOdooDatabase(models.Model):
     def _run_import(self, commit=True, commit_threshold=100):
         """Run the import as cronjob, commit often"""
         self.ensure_one()
+        if not self.password:
+            return
         # model name: [ids]
         remote_ids = {}
         # model name: count
@@ -389,6 +391,8 @@ class ImportOdooDatabase(models.Model):
             if this == self.env.ref('base_import_odoo.demodb', False):
                 continue
             if tools.config['test_enable']:
+                continue
+            if not this.password:
                 continue
             this._get_connection()
 
