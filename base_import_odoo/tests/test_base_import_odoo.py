@@ -31,6 +31,7 @@ class TestBaseImportOdoo(TransactionCase):
                 **(context or self.env.context)
             ).browse(domain_or_ids).read(fields=fields)
 
+        self.env.ref('base_import_odoo.demodb').write({'password': 'admin'})
         with patch('erppeek.Client.search', side_effect=_mock_search):
             with patch('erppeek.Client.read', side_effect=_mock_read):
                 self.env.ref('base_import_odoo.demodb')._run_import()
