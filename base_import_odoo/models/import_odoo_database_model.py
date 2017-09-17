@@ -10,8 +10,11 @@ class ImportOdooDatabaseModel(models.Model):
     _order = 'sequence'
 
     sequence = fields.Integer()
-    model_id = fields.Many2one('ir.model', string='Model', required=True)
+    model_id = fields.Many2one(
+        'ir.model', string='Model', required=True, ondelete='cascade',
+    )
     database_id = fields.Many2one(
         'import.odoo.database', string='Database', required=True,
+        ondelete='cascade',
     )
     domain = fields.Char(help='Optional filter to import only a subset')

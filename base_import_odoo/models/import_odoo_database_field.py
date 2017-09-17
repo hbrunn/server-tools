@@ -10,11 +10,14 @@ class ImportOdooDatabaseField(models.Model):
 
     database_id = fields.Many2one(
         'import.odoo.database', string='Database', required=True,
+        ondelete='cascade',
     )
-    model_id = fields.Many2one('ir.model', string='Model', required=True)
+    model_id = fields.Many2one(
+        'ir.model', string='Model', required=True, ondelete='cascade',
+    )
     fields_id = fields.Many2one(
         'ir.model.fields', string='Field', help='If set, the mapping is only '
-        'effective when setting said field',
+        'effective when setting said field', ondelete='cascade',
     )
     unique = fields.Boolean(
         'Unique', help='If set on a char field, a number is appended until '
