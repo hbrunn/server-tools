@@ -58,6 +58,7 @@ class ImportOdooDatabase(models.Model):
 
     @api.multi
     def action_import(self):
+        """Create a cronjob to run the actual import"""
         self.ensure_one()
         if self.cronjob_id:
             return self.cronjob_id.write({
@@ -145,6 +146,7 @@ class ImportOdooDatabase(models.Model):
 
     @api.multi
     def _run_import_model(self, context):
+        """Import records of a configured model"""
         model = self.env[context.model_line.model_id.model]
         fields = self._run_import_model_get_fields(context)
         for data in context.remote.read(
@@ -163,16 +165,19 @@ class ImportOdooDatabase(models.Model):
 
     @api.multi
     def _create_record(self, context, model, record):
+        """Create a record, add an xmlid"""
         _id = record.pop('id')
         xmlid = '%d-%s-%d' % (
             self.id, model._name.replace('.', '_'), _id,
         )
         if self.env.ref('base_import_odoo.%s' % xmlid, False):
             new = self.env.ref('base_import_odoo.%s' % xmlid)
-            new.write(record)
+            new.with_context(
+                **self._create_record_context(model, record)
+            ).write(record)
         else:
             new = model.with_context(
-                tracking_disable=True,
+                **self._create_record_context(model, record)
             ).create(record)
             self.env['ir.model.data'].create({
                 'name': xmlid,
@@ -185,6 +190,15 @@ class ImportOdooDatabase(models.Model):
             })
         context.idmap[mapping_key(model._name, _id)] = new.id
         return new
+
+    def _create_record_context(self, model, record):
+        """Return a context that is used when creating a record"""
+        context = {
+            'tracking_disable': True,
+        }
+        if model._name == 'res.users':
+            context['no_reset_password'] = True
+        return context
 
     @api.multi
     def _run_import_get_record(self, context, model, record):
