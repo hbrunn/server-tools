@@ -29,7 +29,7 @@ Probably you'll want to map records of model `res.company`, and at least the adm
 
 The module doesn't import one2many fields, if you want to have those, add the model the field in question points to to the list of imported models, possibly with a domain.
 
-If you don't fill in a remote ID, the addon will use the configure local ID for every record of the model (this way, you can for example map all users in the remote system to some import user in the current system).
+If you don't fill in a remote ID, the addon will use the configured local ID for every record of the model (this way, you can for example map all users in the remote system to some import user in the current system).
 
 For fields that have a uniqueness constraint (like `res.users#login`), set the flag `unique`, then the import will generate a unique value for this field.
 
