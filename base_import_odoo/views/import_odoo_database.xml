@@ -16,7 +16,7 @@
                 <form>
                     <header>
                         <button type="object" name="action_import" string="Run import" class="oe_highlight" attrs="{'invisible': [('cronjob_running', '=', True)]}" />
-                        <button type="object" name="write" string="Refresh" class="oe_highlight" attrs="{'invisible': [('cronjob_running', '=', False)]}" />
+                        <button type="object" name="exists" string="Refresh" class="oe_highlight" attrs="{'invisible': [('cronjob_running', '=', False)]}" />
                         <field name="cronjob_running" invisible="1" />
                     </header>
                     <sheet>
