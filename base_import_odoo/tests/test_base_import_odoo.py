@@ -31,21 +31,26 @@ class TestBaseImportOdoo(TransactionCase):
                 **(context or self.env.context)
             ).browse(domain_or_ids).read(fields=fields)
 
-        self.env.ref('base_import_odoo.demodb').write({'password': 'admin'})
-        with patch('erppeek.Client.search', side_effect=_mock_search):
-            with patch('erppeek.Client.read', side_effect=_mock_read):
-                self.env.ref('base_import_odoo.demodb')._run_import()
-        # here the actual test begins - check that we created new objects,
-        # check xmlids, check values, check if dummies are cleaned up/replaced
-        self.assertNotEqual(
-            self.env.ref(self._get_xmlid('base.user_demo')),
-            self.env.ref('base.user_demo'),
-        )
-        self.assertEqual(
-            dict(self.env.ref(self._get_xmlid('base.user_demo'))._cache),
-            dict(self.env.ref('base.user_demo')._cache),
-        )
-        # TODO: test much more
+        for dummy in range(2):
+            # we run this two times to enter the code path where xmlids exist
+            self.env.ref('base_import_odoo.demodb').write({
+                'password': 'admin',
+            })
+            with patch('erppeek.Client.search', side_effect=_mock_search):
+                with patch('erppeek.Client.read', side_effect=_mock_read):
+                    self.env.ref('base_import_odoo.demodb')._run_import()
+            # here the actual test begins - check that we created new
+            # objects, check xmlids, check values, check if dummies are
+            # cleaned up/replaced
+            self.assertNotEqual(
+                self.env.ref(self._get_xmlid('base.user_demo')),
+                self.env.ref('base.user_demo'),
+            )
+            self.assertEqual(
+                dict(self.env.ref(self._get_xmlid('base.user_demo'))._cache),
+                dict(self.env.ref('base.user_demo')._cache),
+            )
+            # TODO: test much more
 
     def _get_xmlid(self, remote_xmlid):
         remote_obj = self.env.ref(remote_xmlid)
