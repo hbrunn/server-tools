@@ -133,7 +133,7 @@ class ImportOdooDatabase(models.Model):
                     self._run_import_model(context)
                 except:
                     error = traceback.format_exc()
-                    self.cr.rollback()
+                    self.env.cr.rollback()
                     self.write({
                         'status_data': dict(self.status_data, error=error),
                     })
