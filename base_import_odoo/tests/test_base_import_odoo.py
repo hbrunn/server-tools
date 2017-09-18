@@ -51,6 +51,13 @@ class TestBaseImportOdoo(TransactionCase):
                 dict(self.env.ref('base.user_demo')._cache),
             )
             # TODO: test much more
+        demodb = self.env.ref('base_import_odoo.demodb')
+        demodb.action_import()
+        self.assertTrue(demodb.cronjob_id)
+        demodb.cronjob_id.write({'active': False})
+        demodb.action_import()
+        self.assertTrue(demodb.cronjob_id.active)
+        self.assertFalse(demodb.cronjob_running)
 
     def _get_xmlid(self, remote_xmlid):
         remote_obj = self.env.ref(remote_xmlid)
