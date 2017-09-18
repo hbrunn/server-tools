@@ -303,7 +303,7 @@ class ImportOdooDatabase(models.Model):
         context.to_delete.setdefault(model._name, [])
         context.to_delete[model._name].append(dummy.id)
         context.dummy_instances.append(
-            dummy_instance(*(context.field_context, (dummy.id,)))
+            dummy_instance(*(context.field_context + (dummy.id,)))
         )
         return dummy.id
 
