@@ -15,25 +15,27 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <button type="object" name="action_import" string="Run import" class="oe_highlight" />
+                        <button type="object" name="action_import" string="Run import" class="oe_highlight" attrs="{'invisible': [('cronjob_running', '=', True)]}" />
+                        <button type="object" name="write" string="Refresh" class="oe_highlight" attrs="{'invisible': [('cronjob_running', '=', False)]}" />
+                        <field name="cronjob_running" invisible="1" />
                     </header>
                     <sheet>
                         <group col="4" name="credentials">
-                            <field name="url" widget="url" />
-                            <field name="database" />
-                            <field name="user" />
-                            <field name="password" password="True" required="True" />
+                            <field name="url" widget="url" attrs="{'readonly': [('cronjob_running', '=', True)]}" />
+                            <field name="database" attrs="{'readonly': [('cronjob_running', '=', True)]}" />
+                            <field name="user" attrs="{'readonly': [('cronjob_running', '=', True)]}" />
+                            <field name="password" password="True" attrs="{'readonly': [('cronjob_running', '=', True)], 'required': [('cronjob_running', '=', False)]}" />
                             <field name="cronjob_id" attrs="{'invisible': [('cronjob_id', '=', False)]}" />
                             <field name="status_html" attrs="{'invisible': [('status_html', '=', False)]}" string="Progress" />
                         </group>
-                        <field name="import_line_ids">
+                        <field name="import_line_ids" attrs="{'readonly': [('cronjob_running', '=', True)]}">
                             <tree editable="top">
                                 <field name="sequence" widget="handle" />
                                 <field name="model_id" />
                                 <field name="domain" />
                             </tree>
                         </field>
-                        <field name="import_field_mappings">
+                        <field name="import_field_mappings" attrs="{'readonly': [('cronjob_running', '=', True)]}">
                             <tree>
                                 <field name="model_id" />
                                 <field name="fields_id" />

@@ -5,6 +5,7 @@ try:
     from erppeek import Client
 except:
     pass
+import psycopg2
 import traceback
 from openerp import _, api, exceptions, fields, models, tools
 from collections import namedtuple
@@ -53,6 +54,7 @@ class ImportOdooDatabase(models.Model):
     cronjob_id = fields.Many2one(
         'ir.cron', string='Import job', readonly=True, copy=False,
     )
+    cronjob_running = fields.Boolean(compute='_compute_cronjob_running')
     status_data = fields.Serialized('Status', readonly=True, copy=False)
     status_html = fields.Html(
         compute='_compute_status_html', readonly=True, sanitize=False,
@@ -434,6 +436,22 @@ class ImportOdooDatabase(models.Model):
             this.status_html = self.env.ref(
                 'base_import_odoo.view_import_odoo_database_qweb'
             ).render({'object': this})
+
+    @api.depends('cronjob_id')
+    @api.multi
+    def _compute_cronjob_running(self):
+        for this in self:
+            if not this.cronjob_id:
+                continue
+            try:
+                with self.env.cr.savepoint():
+                    self.env.cr.execute(
+                        'select id from "%s" where id=%%s for update nowait' %
+                        self.env['ir.cron']._table,
+                        (this.cronjob_id.id,), log_exceptions=False,
+                    )
+            except psycopg2.OperationalError:
+                this.cronjob_running = True
 
     @api.multi
     def _create_cronjob(self):
