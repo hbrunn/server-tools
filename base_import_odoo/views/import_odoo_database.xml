@@ -81,7 +81,7 @@
                     </dd>
                 </t>
             </dl>
-            <t t-if="object.status_data.get('error')"><div t-esc="object.status_data['error']" /></t>
+            <t t-if="object.status_data.get('error')"><pre t-esc="object.status_data['error']" /></t>
         </template>
     </data>
 </openerp>
