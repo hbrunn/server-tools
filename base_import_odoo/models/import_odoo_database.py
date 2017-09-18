@@ -139,7 +139,9 @@ class ImportOdooDatabase(models.Model):
                     self.write({
                         'status_data': dict(self.status_data, error=error),
                     })
-                    return
+                    # pylint: disable=invalid-commit
+                    self.env.cr.commit()
+                    raise
                 done[model._name] += len(ids)
                 self.write({'status_data': dict(self.status_data, done=done)})
                 if commit and not tools.config['test_enable']:
@@ -203,7 +205,9 @@ class ImportOdooDatabase(models.Model):
         return context
 
     @api.multi
-    def _run_import_get_record(self, context, model, record):
+    def _run_import_get_record(
+        self, context, model, record, create_dummy=True,
+    ):
         """Find the local id of some remote record. Create a dummy if not
         available"""
         _id = context.idmap.get((model._name, record['id']))
@@ -230,7 +234,9 @@ class ImportOdooDatabase(models.Model):
                     _id = mapping.local_id
                     context.idmap[(model._name, record['id'])] = _id
                 else:
-                    _id = self._run_import_create_dummy(context, model, record)
+                    _id = self._run_import_create_dummy(
+                        context, model, record, forcecreate=True,
+                    )
         if not _id:
             xmlid = self.env['ir.model.data'].search([
                 ('import_database_id', '=', self.id),
@@ -240,12 +246,14 @@ class ImportOdooDatabase(models.Model):
             if xmlid:
                 _id = xmlid.res_id
                 context.idmap[(model._name, record['id'])] = _id
-        if not _id:
+        if not _id and create_dummy:
             _id = self._run_import_create_dummy(context, model, record)
         return _id
 
     @api.multi
-    def _run_import_create_dummy(self, context, model, record):
+    def _run_import_create_dummy(
+        self, context, model, record, forcecreate=False,
+    ):
         """Either misuse some existing record or create an empty one to satisfy
         required links"""
         dummy = model.search([
@@ -258,7 +266,7 @@ class ImportOdooDatabase(models.Model):
                 ]
             ),
         ], limit=1)
-        if dummy:
+        if dummy and not forcecreate:
             context.dummies[mapping_key(model._name, record['id'])] = dummy.id
             context.dummy_instances.append(
                 dummy_instance(*(context.field_context + (dummy.id,)))
@@ -330,12 +338,17 @@ class ImportOdooDatabase(models.Model):
                 self._run_import_get_record(
                     new_context,
                     self.env[model._fields[field_name].comodel_name],
-                    {'id': _id}
+                    {'id': _id},
+                    create_dummy=model._fields[field_name].required,
                 )
                 for _id in ids
             ]
+            data[field_name] = filter(None, data[field_name])
             if model._fields[field_name].type == 'many2one':
-                data[field_name] = data[field_name][0]
+                if data[field_name]:
+                    data[field_name] = data[field_name] and data[field_name][0]
+                else:
+                    data[field_name] = None
             else:
                 data[field_name] = [(6, 0, data[field_name])]
         for mapping in self.import_field_mappings:
