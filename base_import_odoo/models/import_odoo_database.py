@@ -270,7 +270,7 @@ class ImportOdooDatabase(models.Model):
             if field.required
         ]
         defaults = model.default_get(required)
-        values = {}
+        values = {'id': record['id']}
         for name, field in model._fields.iteritems():
             if name not in required or name in defaults:
                 continue
