@@ -50,8 +50,10 @@ class ImportOdooDatabase(models.Model):
     import_field_mappings = fields.One2many(
         'import.odoo.database.field', 'database_id', string='Field mappings',
     )
-    cronjob_id = fields.Many2one('ir.cron', string='Import job', readonly=True)
-    status_data = fields.Serialized('Status', readonly=True)
+    cronjob_id = fields.Many2one(
+        'ir.cron', string='Import job', readonly=True, copy=False,
+    )
+    status_data = fields.Serialized('Status', readonly=True, copy=False)
     status_html = fields.Html(
         compute='_compute_status_html', readonly=True, sanitize=False,
     )
