@@ -375,7 +375,7 @@ class ImportOdooDatabase(models.Model):
             name: field
             for name, field
             in self.env[context.model_line.model_id.model]._fields.iteritems()
-            if not field.compute and not field.related
+            if not field.compute or field.related
         }
 
     @api.multi
