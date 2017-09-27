@@ -21,7 +21,7 @@
 
 class BaseSuspendSecurityUid(int):
     def __int__(self):
-        return self * 1
+        return self
 
     def __eq__(self, other):
         if isinstance(other, BaseSuspendSecurityUid):
