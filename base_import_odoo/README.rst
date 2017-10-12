@@ -31,7 +31,9 @@ The module doesn't import one2many fields, if you want to have those, add the mo
 
 If you don't fill in a remote ID, the addon will use the configured local ID for every record of the model (this way, you can for example map all users in the remote system to some import user in the current system).
 
-For fields that have a uniqueness constraint (like `res.users#login`), set the flag `unique`, then the import will generate a unique value for this field.
+For fields that have a uniqueness constraint (like `res.users#login`), create a field mapping if type `unique`, then the import will generate a unique value for this field.
+
+For models using references with two fields (like `ir.attachment`), create a field mapping of type `by reference` and select the two fields involved. The import will transform known ids (=ids of models you import) to the respective local id, and clean out the model/id fields for unknown models/ids.
 
 Usage
 =====
@@ -53,6 +55,7 @@ Known issues / Roadmap
 
 * Yes of course this duplicates a lot of connector functionality. Rewrite this with the connector framework, probably collaborate with https://github.com/OCA/connector-odoo2odoo
 * Do something with workflows
+* Support reference fields, while being at it refactor _run_import_map_values to call a function per field type
 * Probably it's safer and faster to disable recomputation during import, and recompute all fields afterwards
 
 Bug Tracker

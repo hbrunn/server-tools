@@ -13,17 +13,19 @@
     ],
     "demo": [
         "demo/res_users.xml",
+        "demo/ir_attachment.xml",
         "demo/import_odoo_database.xml",
         "demo/import_odoo_database_field.xml",
         "demo/import_odoo_database_model.xml",
     ],
     "data": [
+        "views/import_odoo_database_field.xml",
         "security/ir.model.access.csv",
         "views/import_odoo_database.xml",
         "views/menu.xml",
     ],
     "installable": True,
     "external_dependencies": {
-        "python": ['erppeek'],
+        "python": ['odoorpc'],
     },
 }
