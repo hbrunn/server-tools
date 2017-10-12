@@ -18,6 +18,7 @@
         "demo/import_odoo_database_model.xml",
     ],
     "data": [
+        "demo/ir_attachment.xml",
         "views/import_odoo_database_field.xml",
         "security/ir.model.access.csv",
         "views/import_odoo_database.xml",
