@@ -11,6 +11,7 @@ import traceback
 from urlparse import urlparse
 from openerp import _, api, exceptions, fields, models, tools
 from collections import namedtuple
+_logger = logging.getLogger('base_import_odoo')
 
 
 import_context_tuple = namedtuple(
@@ -163,7 +164,9 @@ class ImportOdooDatabase(models.Model):
         for data in context.remote.execute(
                 model._name, 'read', context.ids, fields.keys()
         ):
-            self._run_import_get_record(context, model, data)
+            self._run_import_get_record(
+                context, model, data, create_dummy=False,
+            )
             if (model._name, data['id']) in context.idmap:
                 # there's a mapping for this record, nothing to do
                 continue
@@ -218,15 +221,26 @@ class ImportOdooDatabase(models.Model):
         """Find the local id of some remote record. Create a dummy if not
         available"""
         _id = context.idmap.get((model._name, record['id']))
+        logged = False
         if not _id:
             _id = context.dummies.get((model._name, record['id']))
             if _id:
                 context.dummy_instances.append(
                     dummy_instance(*(context.field_context + (_id,)))
                 )
+        else:
+            logged = True
+            _logger.debug(
+                'Got %s(%d[%d]) from idmap', model._model, _id, record['id'],
+            )
         if not _id:
             _id = self._run_import_get_record_mapping(
                 context, model, record, create_dummy=create_dummy,
+            )
+        elif not logged:
+            logged = True
+            _logger.debug(
+                'Got %s(%d[%d]) from dummies', model._model, _id, record['id'],
             )
         if not _id:
             xmlid = self.env['ir.model.data'].search([
@@ -237,8 +251,18 @@ class ImportOdooDatabase(models.Model):
             if xmlid:
                 _id = xmlid.res_id
                 context.idmap[(model._name, record['id'])] = _id
+        elif not logged:
+            logged = True
+            _logger.debug(
+                'Got %s(%d[%d]) from mappings',
+                model._model, _id, record['id'],
+            )
         if not _id and create_dummy:
             _id = self._run_import_create_dummy(context, model, record)
+        elif _id and not logged:
+            _logger.debug(
+                'Got %s(%d[%d]) from xmlid', model._model, _id, record['id'],
+            )
         return _id
 
     @api.multi
@@ -440,22 +464,28 @@ class ImportOdooDatabase(models.Model):
     def _run_import_model_cleanup_dummies(
             self, context, model, remote_id, local_id
     ):
+        if not (model._name, remote_id) in context.dummies:
+            return
         for instance in context.dummy_instances:
-            if (
-                    instance.model_name != model._name or
-                    instance.remote_id != remote_id
-            ):
+            key = mapping_key(instance.model_name, instance.remote_id)
+            if key not in context.idmap:
                 continue
-            if not context.idmap.get(instance.remote_id):
+            dummy_id = context.dummies[(model._name, remote_id)]
+            record_model = self.env[instance.model_name]
+            comodel = record_model._fields[instance.field_name].comodel_name
+            if comodel != model._name or instance.dummy_id != dummy_id:
                 continue
-            model = self.env[instance.model_name]
-            record = model.browse(context.idmap[instance.remote_id])
-            field_name = instance.field_id.name
+            record = record_model.browse(context.idmap[key])
+            field_name = instance.field_name
+            _logger.debug(
+                'Replacing dummy %d on %s(%d).%s with %d',
+                dummy_id, record_model._name, record.id, field_name, local_id,
+            )
             if record._fields[field_name].type == 'many2one':
                 record.write({field_name: local_id})
             elif record._fields[field_name].type == 'many2many':
                 record.write({field_name: [
-                    (3, context.idmap[remote_id]),
+                    (3, dummy_id),
                     (4, local_id),
                 ]})
             else:
@@ -464,10 +494,10 @@ class ImportOdooDatabase(models.Model):
                     record._fields[field_name].type
                 )
             context.dummy_instances.remove(instance)
-            dummy_id = context.dummies[(record._model, remote_id)]
             if dummy_id in context.to_delete:
                 model.browse(dummy_id).unlink()
-            del context.dummies[(record._model, remote_id)]
+                _logger.debug('Deleting dummy %d', dummy_id)
+            del context.dummies[(model._name, remote_id)]
 
     def _get_connection(self):
         self.ensure_one()
