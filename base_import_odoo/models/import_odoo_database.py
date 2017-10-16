@@ -302,9 +302,13 @@ class ImportOdooDatabase(models.Model):
                     record = context.remote.execute(
                         model._name, 'read', record['id'],
                         mapping.field_ids.mapped('name'),
-                    )[0]
+                    ) or None
+                    if not record:
+                        continue
+                    if isinstance(record, list):
+                        record = record[0]
                 records = model.search([
-                    (field.name, '=', record[field.name])
+                    (field.name, '=', record.get(field.name))
                     for field in mapping.field_ids
                 ], limit=1)
                 if records:
