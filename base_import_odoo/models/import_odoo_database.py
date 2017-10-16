@@ -189,6 +189,7 @@ class ImportOdooDatabase(models.Model):
             new.with_context(
                 **self._create_record_context(model, record)
             ).write(record)
+            _logger.debug('Updated record %s', xmlid)
         else:
             new = model.with_context(
                 **self._create_record_context(model, record)
@@ -202,6 +203,7 @@ class ImportOdooDatabase(models.Model):
                 'import_database_id': self.id,
                 'import_database_record_id': _id,
             })
+            _logger.debug('Created record %s', xmlid)
         context.idmap[mapping_key(model._name, _id)] = new.id
         return new
 
@@ -294,7 +296,13 @@ class ImportOdooDatabase(models.Model):
             elif mapping.mapping_type == 'by_field':
                 assert mapping.field_ids
                 if len(record) == 1:
-                    continue
+                    # just the id of a record we haven't seen yet.
+                    # read the whole record from remote to check if
+                    # this can be mapped to an existing record
+                    record = context.remote.execute(
+                        model._name, 'read', record['id'],
+                        mapping.field_ids.mapped('name'),
+                    )[0]
                 records = model.search([
                     (field.name, '=', record[field.name])
                     for field in mapping.field_ids
@@ -333,6 +341,13 @@ class ImportOdooDatabase(models.Model):
             context.dummies[mapping_key(model._name, record['id'])] = dummy.id
             context.dummy_instances.append(
                 dummy_instance(*(context.field_context + (dummy.id,)))
+            )
+            _logger.debug(
+                'Using %d as dummy for %s(%d[%d]).%s[%d]',
+                dummy.id, context.field_context.record_model,
+                context.idmap.get(context.field_context.record_id, 0),
+                context.field_context.record_id,
+                context.field_context.field_name, record['id'],
             )
             return dummy.id
         required = [
@@ -375,6 +390,13 @@ class ImportOdooDatabase(models.Model):
         context.dummy_instances.append(
             dummy_instance(*(context.field_context + (dummy.id,)))
         )
+        _logger.debug(
+            'Created %d as dummy for %s(%d[%d]).%s[%d]',
+            dummy.id, context.field_context.record_model,
+            context.idmap.get(context.field_context.record_id, 0),
+            context.field_context.record_id or 0,
+            context.field_context.field_name, record['id'],
+        )
         return dummy.id
 
     @api.multi
@@ -402,7 +424,7 @@ class ImportOdooDatabase(models.Model):
                     new_context, comodel, {'id': _id},
                     create_dummy=model._fields[field_name].required or
                     any(
-                        m.model_id._name == comodel._name
+                        m.model_id.model == comodel._name
                         for m in self.import_line_ids
                     ),
                 )
@@ -497,6 +519,7 @@ class ImportOdooDatabase(models.Model):
             if dummy_id in context.to_delete:
                 model.browse(dummy_id).unlink()
                 _logger.debug('Deleting dummy %d', dummy_id)
+        if (model._name, remote_id) in context.dummies:
             del context.dummies[(model._name, remote_id)]
 
     def _get_connection(self):
