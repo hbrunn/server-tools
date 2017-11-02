@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # © 2015 ABF OSIELL <http://osiell.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-from openerp import models, fields
+from openerp import models, fields, tools
 
 
 class AuditlogLog(models.Model):
@@ -44,3 +44,12 @@ class AuditlogLogLine(models.Model):
     field_name = fields.Char(u"Technical name", related='field_id.name')
     field_description = fields.Char(
         u"Description", related='field_id.field_description')
+
+    def _parse_set(self, field_name):
+        """Parse one of the value texts to a set for further processing"""
+        self.ensure_one()
+        try:
+            result = set(tools.safe_eval(self[field_name] or '[]'))
+        except:
+            result = set()
+        return result
