@@ -60,7 +60,7 @@ class ActiveDate(models.AbstractModel):
         store=True,
         index=True,
         help="Active depends on start date, end date and current date")
-    active_change_datetime = fields.DateTime(
+    active_change_datetime = fields.Datetime(
         string='Timestamp active change',
         readonly=True,
         index=True,
