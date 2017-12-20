@@ -5,14 +5,14 @@ from odoo import api, fields, models
 
 
 SQL_SET_ACTIVE = \
-"""UPDATE %s
+    """UPDATE %s
  SET active = true,
      active_change_datetime = %s
  WHERE (active_date_start IS NULL OR active_date_start >= CURRENT_DATE)
    AND (active_date_end IS NULL OR active_date_end < CURRENT_DATE)"""
 
 SQL_SET_INACTIVE = \
-"""UPDATE %s
+    """UPDATE %s
  SET active = false,
      active_change_datetime = %s
  WHERE (NOT active_date_start IS NULL AND active_date_start < CURRENT_DATE)

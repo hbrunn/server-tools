@@ -11,7 +11,7 @@
  'depends': ['base'],
  'license': 'AGPL-3',
  'data': [
-    'data/ir_cron.xml
+    'data/ir_cron.xml',
  ],
  'installable': True,
  }
