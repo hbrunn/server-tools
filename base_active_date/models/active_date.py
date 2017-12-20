@@ -56,7 +56,7 @@ class ActiveDate(models.AbstractModel):
         help="Day that record becomes inactive")
     active = fields.Boolean(
         string='Active',
-        compute='_conpute_active',
+        compute='_compute_active',
         store=True,
         index=True,
         help="Active depends on start date, end date and current date")
