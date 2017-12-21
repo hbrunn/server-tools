@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from psycopg2.extensions import AsIs
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 
 SQL_SET_ACTIVE = \
@@ -82,10 +82,20 @@ class ActiveDate(models.AbstractModel):
         """Refresh the active field for all records where needed."""
         active_change_datetime = fields.Datetime.now()
         cr = self.env.cr
-        cr.execute(
-            SQL_SET_ACTIVE, (AsIs(self._table), active_change_datetime))
-        cr.execute(
-            SQL_SET_INACTIVE, (AsIs(self._table), active_change_datetime))
+        try:
+            cr.execute(
+                SQL_SET_ACTIVE, (AsIs(self._table), active_change_datetime))
+        except Exception as e:
+            _logger.error(_(
+                "Exception when setting records to active for model %s:\n"
+                "%s") % (self._name, e))
+        try:
+            cr.execute(
+                SQL_SET_INACTIVE, (AsIs(self._table), active_change_datetime))
+        except Exception as e:
+            _logger.error(_(
+                "Exception when setting records to inactive for model %s:\n"
+                "%s") % (self._name, e))
         self.active_refresh_post_process(active_change_datetime)
 
     @api.model
