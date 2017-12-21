@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright - 2017 Therp BV.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+from psycopg2.extensions import AsIs
+
 from odoo import api, fields, models
 
 
@@ -8,15 +10,17 @@ SQL_SET_ACTIVE = \
     """UPDATE %s
  SET active = true,
      active_change_datetime = %s
- WHERE (active_date_start IS NULL OR active_date_start >= CURRENT_DATE)
+ WHERE (active IS NULL OR NOT active)
+   AND (active_date_start IS NULL OR active_date_start >= CURRENT_DATE)
    AND (active_date_end IS NULL OR active_date_end < CURRENT_DATE)"""
 
 SQL_SET_INACTIVE = \
     """UPDATE %s
  SET active = false,
      active_change_datetime = %s
- WHERE (NOT active_date_start IS NULL AND active_date_start < CURRENT_DATE)
-   OR (NOT active_date_end IS NULL AND active_date_end >= CURRENT_DATE)"""
+ WHERE (active IS NULL OR active)
+   AND ((NOT active_date_start IS NULL AND active_date_start < CURRENT_DATE)
+   OR (NOT active_date_end IS NULL AND active_date_end >= CURRENT_DATE))"""
 
 
 class ActiveDate(models.AbstractModel):
@@ -57,6 +61,7 @@ class ActiveDate(models.AbstractModel):
     active = fields.Boolean(
         string='Active',
         compute='_compute_active',
+        default=True,  # Only to provide initial value
         store=True,
         index=True,
         help="Active depends on start date, end date and current date")
@@ -77,8 +82,10 @@ class ActiveDate(models.AbstractModel):
         """Refresh the active field for all records where needed."""
         active_change_datetime = fields.Datetime.now()
         cr = self.env.cr
-        cr.execute(SQL_SET_ACTIVE, (self._table, active_change_datetime))
-        cr.execute(SQL_SET_INACTIVE, (self._table, active_change_datetime))
+        cr.execute(
+            SQL_SET_ACTIVE, (AsIs(self._table), active_change_datetime))
+        cr.execute(
+            SQL_SET_INACTIVE, (AsIs(self._table), active_change_datetime))
         self.active_refresh_post_process(active_change_datetime)
 
     @api.model
