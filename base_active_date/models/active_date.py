@@ -89,6 +89,7 @@ class ActiveDate(models.AbstractModel):
         try:
             cr.execute(
                 SQL_SET_ACTIVE, (AsIs(self._table), active_change_datetime))
+            cr.commit()
         except Exception as e:
             _logger.error(_(
                 "Exception when setting records to active for model %s:\n"
@@ -96,6 +97,7 @@ class ActiveDate(models.AbstractModel):
         try:
             cr.execute(
                 SQL_SET_INACTIVE, (AsIs(self._table), active_change_datetime))
+            cr.commit()
         except Exception as e:
             _logger.error(_(
                 "Exception when setting records to inactive for model %s:\n"
