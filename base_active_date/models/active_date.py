@@ -15,16 +15,16 @@ SQL_SET_ACTIVE = \
  SET active = true,
      active_change_datetime = %s
  WHERE (active IS NULL OR NOT active)
-   AND (active_date_start IS NULL OR active_date_start >= CURRENT_DATE)
-   AND (active_date_end IS NULL OR active_date_end < CURRENT_DATE)"""
+   AND (active_date_start IS NULL OR active_date_start <= CURRENT_DATE)
+   AND (active_date_end IS NULL OR active_date_end > CURRENT_DATE)"""
 
 SQL_SET_INACTIVE = \
     """UPDATE %s
  SET active = false,
      active_change_datetime = %s
  WHERE (active IS NULL OR active)
-   AND ((NOT active_date_start IS NULL AND active_date_start < CURRENT_DATE)
-   OR (NOT active_date_end IS NULL AND active_date_end >= CURRENT_DATE))"""
+   AND ((NOT active_date_start IS NULL AND active_date_start > CURRENT_DATE)
+   OR (NOT active_date_end IS NULL AND active_date_end <= CURRENT_DATE))"""
 
 
 class ActiveDate(models.AbstractModel):
