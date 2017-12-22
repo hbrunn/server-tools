@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 # Copyright - 2017 Therp BV.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+import logging
 from psycopg2.extensions import AsIs
 
 from odoo import _, api, fields, models
+
+
+_logger = logging.getLogger(__name__)
 
 
 SQL_SET_ACTIVE = \
