@@ -108,4 +108,6 @@ class ActiveDate(models.AbstractModel):
         for model_name in self.env.registry.models:
             model = self.env[model_name]
             if hasattr(model, 'active_refresh'):
+                _logger.info(_(
+                    "Updating active field for model %s:") % model_name)
                 model.active_refresh()
