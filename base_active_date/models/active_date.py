@@ -43,15 +43,23 @@ class ActiveDate(models.AbstractModel):
         For cases where there can be uncertainty wether the cron job has run,
         an on the fly recomputation is also provided.
         """
+        active_change_datetime = fields.Datetime.now()
         today = fields.Date.today()
+        any_change = False
         for this in self:
+            save_active = this.active
+            new_active = False
             if ((not this.active_date_start or
                     this.active_date_start <= today) and
                     (not this.active_date_end or
                      this.active_date_end >= today)):
-                this.active = True
-            else:
-                this.active = False
+                new_active = True
+            if new_active != save_active:
+                any_change = True
+                this.active = new_active
+                this.active_change_datetime = active_change_datetime
+        if any_change:
+            self.active_refresh_post_process(active_change_datetime)
 
     # All fields provided by mixin start with active, to prevent name clashes
     active_date_start = fields.Date(
