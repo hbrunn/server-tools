@@ -35,7 +35,7 @@ addon | version | summary
 [base_external_dbsource](base_external_dbsource/) | 8.0.1.3.0 | External Database Sources
 [base_field_validator](base_field_validator/) | 8.0.1.0.0 | Validate fields using regular expressions
 [base_import_match](base_import_match/) | 8.0.1.0.1 | Try to avoid duplicates before importing
-[base_import_odoo](base_import_odoo/) | 8.0.1.0.0 | Import records from another Odoo instance
+[base_import_odoo](base_import_odoo/) | 8.0.1.0.1 | Import records from another Odoo instance
 [base_import_security_group](base_import_security_group/) | 8.0.1.0.0 | Group-based permissions for importing CSV files
 [base_ir_filters_active](base_ir_filters_active/) | 8.0.1.0.0 | Allows you to disable (hide) filters
 [base_manifest_extension](base_manifest_extension/) | 8.0.1.0.0 | Adds some useful keys to manifest files
@@ -74,19 +74,20 @@ addon | version | summary
 [mass_editing](mass_editing/) | 8.0.1.3.0 | Mass Editing
 [module_prototyper](module_prototyper/) | 8.0.0.3.0 | Prototype your module.
 [module_uninstall_check](module_uninstall_check/) | 8.0.1.0.0 | Add Extra Checks before uninstallation of modules
-[password_security](password_security/) | 8.0.1.0.0 | Allow admin to set password security requirements.
+[password_security](password_security/) | 8.0.1.1.1 | Allow admin to set password security requirements.
 [profiler](profiler/) | 8.0.1.0.0 | profiler
 [qweb_usertime](qweb_usertime/) | 8.0.1.0.0 | Add user time rendering support in QWeb
 [save_translation_file](save_translation_file/) | 8.0.1.0.0 | Allows developpers to easily generate i18n files
 [scheduler_error_mailer](scheduler_error_mailer/) | 8.0.1.0.0 | Send an e-mail when a scheduler fails
 [secure_uninstall](secure_uninstall/) | 8.0.1.0.0 | Ask password to authorize uninstall
+[sentry](sentry/) | 8.0.1.0.0 | Report Odoo errors to Sentry
 [server_environment](server_environment/) | 8.0.1.1.0 | server configuration environment files
 [server_environment_files_sample](server_environment_files_sample/) | 8.0.1.0.0 | Example server configuration environment files repository module
 [shell](shell/) | 8.0.1.0.0 | Backport of the v9 shell CLI command.
 [sql_export](sql_export/) | 8.0.1.0.0 | Export data in csv file with SQL requests
 [sql_request_abstract](sql_request_abstract/) | 8.0.1.0.0 | Abstract Model to manage SQL Requests
 [super_calendar](super_calendar/) | 8.0.0.2.0 | This module allows to create configurable calendars.
-[users_ldap_groups](users_ldap_groups/) | 8.0.1.2.1 | Adds user accounts to groups based on rules defined by the administrator.
+[users_ldap_groups](users_ldap_groups/) | 8.0.1.2.2 | Adds user accounts to groups based on rules defined by the administrator.
 [users_ldap_mail](users_ldap_mail/) | 8.0.1.0.0 | LDAP mapping for user name and e-mail
 [users_ldap_populate](users_ldap_populate/) | 8.0.1.2.1 | Create users from LDAP before they log in
 [users_ldap_push](users_ldap_push/) | 8.0.1.0.0 | Creates a ldap entry when you create a user in Odoo

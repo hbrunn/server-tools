@@ -67,7 +67,7 @@ class ResUsers(models.Model):
             value = mapping._get_value(self, values)
             if not value:
                 continue
-            result[mapping.attribute] = [str(value)]
+            result[str(mapping.attribute)] = [str(values[field_name])]
         if result:
             result['objectClass'] = conf.create_ldap_entry_objectclass\
                 .encode('utf-8').split(',')
