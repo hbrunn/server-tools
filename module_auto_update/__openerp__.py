@@ -5,7 +5,7 @@
 {
     'name': 'Module Auto Update',
     'summary': 'Automatically update Odoo modules',
-    'version': '8.0.2.0.1',
+    'version': '8.0.2.0.3',
     'category': 'Extra Tools',
     'website': 'https://github.com/OCA/server-tools',
     'author': 'LasLabs, '
@@ -21,4 +21,6 @@
     'depends': [
         'base',
     ],
+    'development_status': 'Production/Stable',
+    'maintainers': ['sbidoul'],
 }
