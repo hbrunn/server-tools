@@ -93,8 +93,8 @@ def post_load_hook():
             while children:
                 new_children = []
                 for child in children:
-                     to_reload.add(node)
-                     new_children.extend(child.children)
+                    to_reload.add(node)
+                    new_children.extend(child.children)
                 children = new_children
 
     for node in sorted(to_reload, key=lambda x: x.depth):
