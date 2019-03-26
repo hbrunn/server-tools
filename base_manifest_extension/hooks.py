@@ -96,7 +96,12 @@ def post_load_hook():
                     to_reload.add(node)
                     new_children.extend(child.children)
                 children = new_children
-
     for node in sorted(to_reload, key=lambda x: x.depth):
         del graph[node.name]
-        graph.add_module(cr, node.name)
+        if not graph.add_module(cr, node.name):
+            # this happens when Odoo has already marked the module as missing
+            # dependencies. Force-add to the graph with updated info
+            graph.add_node(
+                node.name,
+                load_information_from_description_file(node.name),
+            )
