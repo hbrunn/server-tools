@@ -2,18 +2,10 @@
 # Copyright 2018 Therp BV <http://therp.nl>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from odoo.tests import SingleTransactionCase
-from acme import errors
+from ..models.letsencrypt import _get_data_dir
 from os import path
+import shutil
 import mock
-import urlparse
-import logging
-
-_logger = logging.getLogger(__name__)
-
-try:
-    import josepy as jose
-except ImportError as e:
-    _logger.debug(e)
 
 
 class TestLetsencrypt(SingleTransactionCase):
@@ -31,9 +23,11 @@ class TestLetsencrypt(SingleTransactionCase):
             'dns_provider': 'shell',
             'script': 'touch /tmp/.letsencrypt_test',
             'altnames':
-                'test.test.com',
+                'test.example.com',
             'reload_command': 'echo',
             })
+        self.env['ir.config_parameter'].set_param(
+            'web.base.url', 'http://www.example.com')
         settings.set_dns_provider()
         setting_vals = settings.default_get([])
         self.assertEquals(setting_vals['dns_provider'], 'shell')
@@ -46,42 +40,62 @@ class TestLetsencrypt(SingleTransactionCase):
         self.assertEquals(setting_vals['reload_command'], 'echo')
         settings.onchange_altnames()
         self.assertEquals(settings.needs_dns_provider, False)
+        settings.unlink()
 
-    @mock.patch('odoo.addons.letsencrypt.models.letsencrypt')
-    def test_letsencrypt(self, mock_obj):
-        letsencrypt = self.env['letsencrypt']
-        mockV2 = mock.Mock
+    def new_order(self, typ):
+        if typ not in ['http-01', 'dns-01']:
+            raise ValueError
+        authzr = mock.Mock
         order_resource = mock.Mock
         order_resource.fullchain_pem = 'test'
-        mockV2.poll_and_finalize = order_resource
         authorization = mock.Mock
         body = mock.Mock
-        challenge_http = mock.Mock
-        challenge_http.chall = mock.Mock
-        challenge_http.chall.typ = 'http-01'
-        challenge_http.chall.token = 'a_token'
-        challenge_dns = mock.Mock
-        challenge_dns.chall = mock.Mock
-        challenge_dns.chall.typ = 'dns-01'
-        challenge_dns.chall.token = 'a_token'
-        challenges = [challenge_dns, challenge_http]
-        body.challenges = challenges
+        challenge = mock.Mock
+        challenge.chall = mock.Mock
+        challenge.chall.typ = typ
+        challenge.chall.token = 'a_token'
+        body.challenges = [challenge]
         authorization.body = body
-        mockV2.new_order = mock.Mock(side_effect=lambda x: mock.Mock(
-            authorizations=[authorization]))
-        mock_obj.client.ClientV2 = mockV2(create=True)
-        with self.assertRaises(errors.Error):
-            letsencrypt._cron()
-            account_key_file = letsencrypt._generate_key('account_key')
-            account_key = jose.JWKRSA.load(open(account_key_file).read())
-            domain = urlparse.urlparse(
-                self.env['ir.config_parameter'].get_param(
-                    'web.base.url', 'localhost')).netloc
-            domain_key_file = letsencrypt._generate_key(domain)
-            mockV2.new_order.assert_called_with(letsencrypt._make_csr(
-                account_key,
-                domain_key_file,
-                domain))
-            mockV2._respond_challenge_dns.assert_called_with(
-                challenge_dns,
-                domain)
+        authzr.authorizations = [authorization]
+        return authzr
+
+    def poll(self, deadline):
+        order_resource = mock.Mock
+        order_resource.fullchain_pem = 'chain'
+        return order_resource
+
+    @mock.patch('acme.client.ClientV2.answer_challenge')
+    @mock.patch('acme.client.ClientV2.poll_and_finalize', side_effect=poll)
+    def test_http_challenge(self, poll, answer_challenge):
+        letsencrypt = self.env['letsencrypt']
+        self.env['ir.config_parameter'].set_param(
+            'web.base.url', 'http://www.example.com')
+        settings = self.env['base.config.settings']
+        settings.create({
+            'altnames': 'test.example.com',
+            })
+        letsencrypt._cron()
+        poll.assert_called()
+        self.assertTrue(
+            open(path.join(_get_data_dir(), 'www.example.com')).read(),
+        )
+
+    @mock.patch('acme.client.ClientV2.answer_challenge')
+    @mock.patch('acme.client.ClientV2.poll_and_finalize', side_effect=poll)
+    def test_dns_challenge(self, poll, answer_challenge):
+        letsencrypt = self.env['letsencrypt']
+        settings = self.env['base.config.settings']
+        settings.create({
+            'dns_provider': 'shell',
+            'script': 'echo',
+            'altnames': '*.example.com',
+        })
+        letsencrypt._cron()
+        poll.assert_called()
+        self.assertTrue(
+            open(path.join(_get_data_dir(), 'www.example.com')).read(),
+        )
+
+    def tearDown(self):
+        super(TestLetsencrypt, self).tearDown()
+        shutil.rmtree(_get_data_dir(), ignore_errors=True)
