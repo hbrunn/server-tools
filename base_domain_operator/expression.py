@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # © 2017 Therp BV <http://therp.nl>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+import threading
 from openerp import api
 # pylint: disable=W0402
 from openerp.osv.expression import ExtendedLeaf, expression, is_operator,\
     is_leaf
+from openerp.modules.registry import RegistryManager
 
 
 class BaseDomainOperatorExtendedLeaf(ExtendedLeaf):
@@ -52,11 +54,11 @@ def is_leaf_base_domain_operator(element, internal=False):
             isinstance(element, tuple) or isinstance(element, list)
     ) and len(element) > 1:
         # see if we have an environment with this operator
-        for env in api.Environment.envs:
-            if 'base.domain.operator' in env.registry:
-                result = hasattr(
-                    env['base.domain.operator'],
-                    '_operator_%s' % element[1].replace(' ', '_')
-                )
-            break
+        dbname = threading.current_thread().dbname
+        registry = RegistryManager.get(dbname)
+        if 'base.domain.operator' in registry:
+            result = hasattr(
+                registry['base.domain.operator'],
+                '_operator_%s' % element[1].replace(' ', '_')
+            )
     return result
