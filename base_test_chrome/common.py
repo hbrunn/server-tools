@@ -472,7 +472,7 @@ class HttpCase(TransactionCase):
         env = api.Environment(self.cr, uid, {})
 
         # self.session.authenticate(db, user, password, uid=uid)
-        # odooSession.authenticate accesses the current request, which we
+        # OpenErpSession.authenticate accesses the current request, which we
         # don't have, so reimplement it manually...
         session = self.session
 
