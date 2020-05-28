@@ -1,6 +1,11 @@
+acme
+cryptography
+dnspython
+josepy
 raven
 openpyxl
 xlrd
 xlwt
 pysftp
-pygount>1.2.1
+# version 1.2.0 deprecates the API module_analysis uses
+pygount<1.2.0
