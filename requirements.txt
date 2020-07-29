@@ -1,4 +1,9 @@
 sentry-sdk
+acme
+cryptography
+dnspython
+josepy
+raven
 openpyxl
 xlrd
 xlwt
