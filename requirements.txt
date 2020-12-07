@@ -11,3 +11,4 @@ pysftp
 raven
 xlrd
 xlwt
+odoorpc
