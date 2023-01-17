@@ -5,10 +5,10 @@ cryptography
 dnspython
 josepy
 lxml
+odoorpc
 openpyxl
 pygount
 pysftp
 raven
 xlrd
 xlwt
-odoorpc
