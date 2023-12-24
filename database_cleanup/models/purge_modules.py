@@ -55,8 +55,9 @@ class CleanupPurgeLineModule(models.TransientModel):
         to_remove += to_remove.downstream_dependencies()
         to_remove.write({"state": "to remove"})
         installed.button_immediate_uninstall()
-        modules.env.invalidate_all()
-        modules.unlink()
+        with self.env.registry.cursor() as new_cr:
+            self.env(cr=new_cr)['ir.module.module'].browse(modules.ids).unlink()
+        self.env.invalidate_all()
         return self.write({"purged": True})
 
 
