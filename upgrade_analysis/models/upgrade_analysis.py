@@ -717,6 +717,7 @@ class UpgradeAnalysis(models.Model):
             end_version.replace(".", ""),
         )
 
+        os.makedirs(module_coverage_file_folder, exist_ok=True)
         file_path = os.path.join(module_coverage_file_folder, file_name)
         f = open(file_path, "w+")
         f.write(rendered_text)
