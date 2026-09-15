@@ -8,7 +8,7 @@
     "version": "19.5.1.0.0",
     "category": "Migration",
     "author": "Therp BV, Opener B.V., GRAP, Odoo Community Association (OCA)",
-    "maintainers": ["StefanRijnhart", "legalsylvain"],
+    "maintainers": ["StefanRijnhart", "legalsylvain", "hbrunn"],
     "website": "https://github.com/OCA/server-tools",
     "data": [
         "templates/module_coverage_template.xml",
